@@ -1,29 +1,27 @@
 const { JWT_SECRET } = require('../constants/constants');
-const jwt = require('jsonwebtoken');
-
-module.exports.signToken = (params) => {
-  return jwt.sign(
-    {
-      exp: Math.floor(Date.now() / 1000) + 60,
-      data: params,
-    },
-    JWT_SECRET
-  );
-};
-
-module.exports.verifyToken = (token) => {
-  try {
-    const data = jwt.verify(token, JWT_SECRET);
-    return [true, 'Login Success', data];
-  } catch (error) {
-    let err;
-    switch (error.name) {
-      case 'TokenExpiredError':
-        err = 'Token Expired';
-        break;
-      default:
-        err = error.name;
+const jwt = require("jsonwebtoken");
+module.exports = {
+  checkToken: (req, res, next) => {
+    let token = req.headers['authorization'];
+    if (token) {
+      // Remove Bearer from string
+      let[type, jwtToen] = token.split(" ");
+      jwt.verify(jwtToen, JWT_SECRET, (err, decoded) => {
+        if (err) {
+          return res.json({
+            success: 0,
+            message: "Invalid Token..."
+          });
+        } else {
+          req.decoded = decoded;
+          next();
+        }
+      });
+    } else {
+      return res.json({
+        success: 0,
+        message: "Access Denied! Unauthorized User"
+      });
     }
-    return [false, err];
   }
 };

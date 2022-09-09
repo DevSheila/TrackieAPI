@@ -2,6 +2,8 @@ const { encrypt, compare } = require('../services/crypto');
 const { generateOTP } = require('../services/OTP');
 const { sendMail } = require('../services/MAIL');
 const User = require('../models/User');
+const passport=require('passport');
+
 
 module.exports.signUpUser = async (req, res) => {
   try{
@@ -17,20 +19,41 @@ module.exports.signUpUser = async (req, res) => {
         message: 'Unable to create new user',
       });
     }
-    
-
     res.send(newUser);
 
   }catch(error){
     console.log(error)
-    
   }
 };
 
-module.exports.verifyEmail = async (req, res) => {
+module.exports.login = async (req, res) => {
   const { email, otp } = req.body;
   const user = await validateUserSignUp(email, otp);
   res.send(user);
+};
+
+module.exports.logout = async (req, res) => {
+  try{
+    let email= req.params.email
+
+    const user = await User.findOne({
+      email
+    });
+    const updatedUser = await User.findByIdAndUpdate(user._id, {
+      $set: { active: false },
+    });
+    return res.json({
+              success: 1,
+              message: "logout successfully",
+              user: updatedUser
+            });
+  }catch(error){
+    res.json({
+      success: 1,
+      error:error
+     
+    }); 
+  }
 };
 
 const findUserByEmail = async (email) => {
@@ -53,6 +76,7 @@ const createUser = async (fname,lname,phone,email, password) => {
     email,
     password: hashedPassword,
     otp: otpGenerated,
+    twoFa:true
   });
   if (!newUser) {
     return [false, 'Unable to sign you up'];
@@ -83,3 +107,4 @@ const validateUserSignUp = async (email, otp) => {
   });
   return [true, updatedUser];
 };
+

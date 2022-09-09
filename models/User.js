@@ -37,6 +37,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  twoFa:{
+    type: Boolean,
+    required: true,
+  },
 });
 
 module.exports = mongoose.model('User', userSchema);
