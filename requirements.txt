@@ -1,5 +1,14 @@
-
 npm init -y
 npm i express
 npm i -D nodemon
 npm i mongoose body-parser cors dotenv
+
+
+connect-mongo connects to MongoDB, which you’ll use as a session store;
+cors handles CORS;
+dotenv loads environment variables from the .env file that you will create in a later step;
+express is the web framework you’ll use for the backend;
+express-session provides middleware to handle session data;
+http-errors helps create server errors;
+morgan handles logging;
+twilio creates the Twilio client, generates tokens, creates conversations, and adds participants.
