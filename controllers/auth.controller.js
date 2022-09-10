@@ -1,4 +1,4 @@
-const { encrypt, compare } = require('../services/crypto');
+const { encrypt} = require('../services/crypto');
 const { sendMail } = require('../services/MAIL');
 const User = require('../models/User');
 const JsonWebToken = require("jsonwebtoken");
