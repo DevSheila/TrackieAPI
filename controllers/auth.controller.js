@@ -7,6 +7,8 @@ const BodyParser = require("body-parser");
 const JsonWebToken = require("jsonwebtoken");
 const Bcrypt = require("bcryptjs");
 const TwoFactor = require('node-2fa');
+const { JWT_SECRET } = require('../constants/constants');
+
 
 
 module.exports.signUpUser = async (req, res) => {
@@ -36,22 +38,25 @@ module.exports.login = async (req, res) => {
   const user = await User.findOne({email});
 
   if (!user) {
-    return res.json({"message":"no such user"});
+    return res.json({
+      success: 0,
+      data: "Invalid email"
+    });
 
   }else{
     validOtp=TwoFactor.generateToken(user.otp)
     if(validOtp === otp){
-      return res.json({
-        "otp":otp,
-        "validOtp":validOtp,
-        "message":"valid otp"
-      });
+      var token = JsonWebToken.sign({ "email": email }, JWT_SECRET, {});
 
-    }else{
       return res.json({
-        "otp":otp,
-        "validOtp":validOtp,
-        "message":"invalid otp"
+        success: 1,
+        message: "login successfully",
+        token: jsontoken
+      });
+    } else {
+      return res.json({
+        success: 0,
+        data: "Invalid OTP"
       });
     }
   }
@@ -67,6 +72,7 @@ module.exports.logout = async (req, res) => {
     const updatedUser = await User.findByIdAndUpdate(user._id, {
       $set: { active: false },
     });
+    //do some redirect?or expire session
     return res.json({
               success: 1,
               message: "logout successfully",
