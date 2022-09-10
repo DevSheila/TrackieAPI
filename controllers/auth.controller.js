@@ -1,11 +1,7 @@
 const { encrypt, compare } = require('../services/crypto');
-const { generateOTP } = require('../services/OTP');
 const { sendMail } = require('../services/MAIL');
 const User = require('../models/User');
-const passport=require('passport');
-const BodyParser = require("body-parser");
 const JsonWebToken = require("jsonwebtoken");
-const Bcrypt = require("bcryptjs");
 const TwoFactor = require('node-2fa');
 const { JWT_SECRET } = require('../constants/constants');
 
