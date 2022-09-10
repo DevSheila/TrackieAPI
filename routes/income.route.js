@@ -4,6 +4,9 @@ const  {checkToken}= require("../services/JWT")//route protection with JWT
 
 
 router.post('/add', checkToken ,incomeController.addIncome);
-router.delete('/delte/:incomeId', checkToken ,incomeController.deleteIncome);
+router.delete('/delete/:incomeId', checkToken ,incomeController.deleteIncome);
+router.delete('/update/:incomeId', checkToken ,incomeController.updateIncome);
+
+
 
 module.exports = router;

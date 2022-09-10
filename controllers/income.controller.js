@@ -54,5 +54,32 @@ module.exports={
             });
     
         }
+     },updateIncome:async (req,res)=>{
+        try{
+            // get income and it's userId
+            const income= await Income.findOne(req.params.incomeId);
+            const incomeUserId=income.dataValues.userId;
+    
+            // validate and update
+            if(req.decoded.result.id !== incomeUserId){
+                return res.json({
+                    success: 0,
+                    message:"you are unauthorised to update this income"
+                });
+            }else{
+                let results=await income.destroy();
+                return res.json({
+                    success: 1,
+                    message:"success",
+                    data:results
+                   });
+            }
+        }catch(error){
+            return res.json({
+                success: 0,
+                message:error
+            });
+    
+        }
      }
 }
