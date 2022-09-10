@@ -1,4 +1,3 @@
-const { JWT_SECRET } = require('../constants/constants');
 const jwt = require("jsonwebtoken");
 module.exports = {
   checkToken: (req, res, next) => {
@@ -6,7 +5,7 @@ module.exports = {
     if (token) {
       // Remove Bearer from string
       let[type, jwtToen] = token.split(" ");
-      jwt.verify(jwtToen, JWT_SECRET, (err, decoded) => {
+      jwt.verify(jwtToen, process.env.SECRET, (err, decoded) => {
         if (err) {
           return res.json({
             success: 0,
