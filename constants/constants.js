@@ -3,13 +3,15 @@ module.exports = {
   allowedOrigins: ['http://localhost:5000/'],
   SERVER_PORT: process.env.PORT || 5000,
   SERVER_DB_URI: process.env.DB_URI,
-  JWT_SECRET: 'thisIsASimpleTest',
+  // JWT_SECRET: `${process.env.JWT_SECRET}`,
+  JWT_SECRET: "56ab984hi",
   OTP_LENGTH: 4,
   OTP_CONFIG: {
     lowerCaseAlphabets:false,
     upperCaseAlphabets: false,
     specialChars: false,
   },
+  
   MAIL_SETTINGS: {
     service: 'gmail',
     auth: {

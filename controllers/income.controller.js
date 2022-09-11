@@ -54,7 +54,7 @@ module.exports={
             });
     
         }
-     },updateIncome:async (req,res)=>{
+    },updateIncome:async (req,res)=>{
         try{
             // get income and it's userId
             const income= await Income.findOne(req.params.incomeId);
@@ -66,6 +66,7 @@ module.exports={
                     success: 0,
                     message:"you are unauthorised to update this income"
                 });
+                
             }else{
                 let results=await income.destroy();
                 return res.json({

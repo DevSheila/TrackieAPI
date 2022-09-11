@@ -1,12 +1,11 @@
 const router = require('express').Router();
 const incomeController = require('../controllers/income.controller');
-const  {checkToken}= require("../services/JWT")//route protection with JWT
+const {checkToken}= require("../services/token_validations")//route protection with JWT
 
-
+// router.get('/view/:incomeId', checkToken ,incomeController.getIncomeById);
 router.post('/add', checkToken ,incomeController.addIncome);
 router.delete('/delete/:incomeId', checkToken ,incomeController.deleteIncome);
-router.delete('/update/:incomeId', checkToken ,incomeController.updateIncome);
-
+router.put('/update/:incomeId', checkToken ,incomeController.updateIncome);
 
 
 module.exports = router;

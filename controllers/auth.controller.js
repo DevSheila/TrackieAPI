@@ -4,6 +4,8 @@ const User = require('../models/User');
 const JsonWebToken = require("jsonwebtoken");
 const TwoFactor = require('node-2fa');
 const { JWT_SECRET } = require('../constants/constants');
+const { sign } = require("jsonwebtoken");
+
 
 
 
@@ -40,19 +42,23 @@ module.exports.login = async (req, res) => {
     });
 
   }else{
-    validOtp=TwoFactor.generateToken(user.otp)
+    validOtp=TwoFactor.generateToken(user.otp).token
     if(validOtp === otp){
-      var token = JsonWebToken.sign({ "email": email }, JWT_SECRET, {});
+      let token = sign({ result: user }, JWT_SECRET, {expiresIn: "1h"});
+      // var token = JsonWebToken.sign({ "username": user.username, "authorized": !user["2fa"] }, app.get("jwt-secret"), {});
+
 
       return res.json({
         success: 1,
         message: "login successfully",
-        token: jsontoken
+        token: token,
       });
     } else {
       return res.json({
         success: 0,
-        data: "Invalid OTP"
+        data: "Invalid OTP",
+        otp:otp,
+        validOtp:validOtp
       });
     }
   }
