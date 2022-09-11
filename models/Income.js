@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
 
 const incomeSchema = new mongoose.Schema({
-  userId: {
+  user: {
     type: String,
-    required: true,
+    required: false,
   },
   desc: {
     type: String,

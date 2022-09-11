@@ -6,6 +6,9 @@ const {checkToken}= require("../services/token_validations")//route protection w
 router.post('/add', checkToken ,incomeController.addIncome);
 router.delete('/delete/:incomeId', checkToken ,incomeController.deleteIncome);
 router.put('/update/:incomeId', checkToken ,incomeController.updateIncome);
-
+router.get('/',checkToken,(req,res)=>{
+    console.log(req.headers)
+    res.send("yeey")
+})
 
 module.exports = router;

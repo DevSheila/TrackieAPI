@@ -1,7 +1,7 @@
 const Income = require("../models/Income")
 module.exports={
     addIncome: async (req,res)=>{
-        req.body.userId=req.decoded.result.id;
+        req.body.user=req.decoded.result._id;
     
         if(req.body.desc== null || req.body.category== null ||req.body.amount== null ||req.body.date== null ){
             return res.json({
@@ -34,7 +34,7 @@ module.exports={
             const incomeUserId=income.dataValues.userId;
     
             // validate and destroy
-            if(req.decoded.result.id !== incomeUserId){
+            if(req.decoded.result._id !== incomeUserId){
                 return res.json({
                     success: 0,
                     message:"you are unauthorised to delete this income"
@@ -61,12 +61,12 @@ module.exports={
             const incomeUserId=income.dataValues.userId;
     
             // validate and update
-            if(req.decoded.result.id !== incomeUserId){
+            if(req.decoded.result._id !== incomeUserId){
                 return res.json({
                     success: 0,
                     message:"you are unauthorised to update this income"
                 });
-                
+
             }else{
                 let results=await income.destroy();
                 return res.json({
