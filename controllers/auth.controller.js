@@ -5,6 +5,7 @@ const JsonWebToken = require("jsonwebtoken");
 const TwoFactor = require('node-2fa');
 const { JWT_SECRET } = require('../constants/constants');
 const { sign } = require("jsonwebtoken");
+const speakeasy = require('speakeasy');
 
 
 
@@ -42,10 +43,24 @@ module.exports.login = async (req, res) => {
     });
 
   }else{
-    validOtp=TwoFactor.generateToken(user.otp).token
-    if(validOtp === otp){
+    validOtp=speakeasy.totp({
+      secret: user.otp,
+      encoding: 'base32'
+    });
+
+
+    const toeknValidate = speakeasy.totp.verify({
+      secret:user.otp,//expected
+      encoding: 'base32',
+      token:otp, //user input
+      window:10 //valid otp for for 5 minutes
+    });
+    
+    console.log(toeknValidate)
+
+
+    if(toeknValidate){
       let token = sign({ result: user }, JWT_SECRET, {expiresIn: "1h"});
-      // var token = JsonWebToken.sign({ "username": user.username, "authorized": !user["2fa"] }, app.get("jwt-secret"), {});
 
 
       return res.json({
@@ -102,9 +117,14 @@ const findUserByEmail = async (email) => {
 const createUser = async (fname,lname,phone,email, password) => {
   const hashedPassword = await encrypt(password);
 
-  let otpGenerated =TwoFactor.generateSecret().secret
+  let secret =speakeasy.generateSecret({length:20}).base32;
 
-  console.log(`token${TwoFactor.generateToken(otpGenerated).token}`)
+  let otp = speakeasy.totp({
+    secret:secret,
+    encoding:'base32',
+
+  })
+
 
   const newUser = await User.create({
     fname,
@@ -112,15 +132,17 @@ const createUser = async (fname,lname,phone,email, password) => {
     phone,
     email,
     password: hashedPassword,
-    otp: otpGenerated
+    otp: secret
   });
   if (!newUser) {
     return [false, 'Unable to sign you up'];
   }
   try {
+
+   
     await sendMail({
       to: email,
-      OTP:TwoFactor.generateToken(otpGenerated).token,
+      OTP:otp,
     });
     return [true, newUser];
   } catch (error) {
@@ -128,19 +150,4 @@ const createUser = async (fname,lname,phone,email, password) => {
   }
 };
 
-const validateUserSignUp = async (email, otp) => {
-  const user = await User.findOne({
-    email,
-  });
-  if (!user) {
-    return [false, 'User not found'];
-  }
-  if (user && user.otp !== otp) {
-    return [false, 'Invalid OTP'];
-  }
-  const updatedUser = await User.findByIdAndUpdate(user._id, {
-    $set: { active: true },
-  });
-  return [true, updatedUser];
-};
 

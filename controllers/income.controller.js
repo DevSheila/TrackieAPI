@@ -8,6 +8,7 @@ module.exports={
                 success: 0,
                 message:"Please enter all required fields"
             });
+
         }else{
             const income = new Income(req.body);
             try{

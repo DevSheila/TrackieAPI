@@ -1,9 +1,10 @@
 const router = require('express').Router();
 const authController = require('../controllers/auth.controller');
 var TwoFactor = require('node-2fa');
+const speakeasy=require('speakeasy')
 
 
-router.post('/', authController.signUpUser);
+router.post('/signup', authController.signUpUser);
 router.post('/login', authController.login);
 router.post('/logout/:email', authController.logout);
 router.get("/generate-secret", function(request, response) {
@@ -11,8 +12,14 @@ router.get("/generate-secret", function(request, response) {
 });
 
 router.post("/generate-otp", function(request, response) {
-  response.send({ "otp": TwoFactor.generateToken(request.body.secret) });
+  let token=speakeasy.totp({
+    secret: request.body.secret,
+    encoding: 'base32',
+    window:5
+  });
+  response.send({ "otp": token });
 });
+
 
 
 

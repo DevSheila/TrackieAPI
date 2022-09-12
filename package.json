@@ -28,6 +28,7 @@
     "passport": "^0.6.0",
     "passport-local": "^1.0.0",
     "passport-strategy": "^1.0.0",
+    "speakeasy": "^2.0.0",
     "thirty-two": "^1.0.2",
     "totp": "0.0.1",
     "totp-generator": "0.0.13"
