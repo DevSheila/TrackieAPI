@@ -8,6 +8,10 @@ const { sign } = require("jsonwebtoken");
 const speakeasy = require('speakeasy');
 
 
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
+const client = require('twilio')(accountSid, authToken);
+
 
 
 module.exports.signUpUser = async (req, res) => {
@@ -32,9 +36,23 @@ module.exports.signUpUser = async (req, res) => {
 };
 
 module.exports.login = async (req, res) => {
-  const { email, otp } = req.body;
 
-  const user = await User.findOne({email});
+  const { email, otp,phone } = req.body;
+
+  //find means of login
+  let user ="";
+
+  if(email){
+    user= await User.findOne({email});
+  }else if(phone){
+    user= await User.findOne({phone});
+
+  }else{
+    return res.json({
+      success: 0,
+      data: "Provide email or phone number"
+    });
+  }
 
   if (!user) {
     return res.json({
@@ -49,19 +67,17 @@ module.exports.login = async (req, res) => {
     });
 
 
-    const toeknValidate = speakeasy.totp.verify({
+    const tokenValidate = speakeasy.totp.verify({
       secret:user.otp,//expected
       encoding: 'base32',
       token:otp, //user input
       window:10 //valid otp for for 5 minutes
     });
     
-    console.log(toeknValidate)
 
 
-    if(toeknValidate){
+    if(tokenValidate){
       let token = sign({ result: user }, JWT_SECRET, {expiresIn: "1h"});
-
 
       return res.json({
         success: 1,
@@ -104,6 +120,90 @@ module.exports.logout = async (req, res) => {
   }
 };
 
+module.exports.getOtp = async (req, res) => {
+
+  let contact =req.params.contact
+
+  if(contact.includes('+')){
+    try{
+      const user = await User.findOne({ phone:contact});
+  
+      let otp=speakeasy.totp({
+        secret: user.otp,
+        encoding: 'base32'
+      }); 
+  
+  
+      let message =await  client.messages
+      .create({
+        body: otp,
+        from: process.env.TWILIO_NUMBER,
+        to: contact
+      })
+  
+      return res.json({
+        "status":1,
+        "message":`successfully sent phone to : ${contact}`,
+        "data":message.sid
+      })
+  
+    }catch(error){
+      return res.json({
+        "status":0,
+        "message":error
+      })
+    }
+  
+  }
+ 
+  if(contact.includes('@')){
+
+    //checkif user exists 
+    const user = await User.findOne({ email:contact});
+
+    if (!user) {
+      return res.json({
+        "status":0,
+        "message":"user does not exist"
+      });
+    }else{
+
+      
+      let otp=speakeasy.totp({
+        secret: user.otp,
+        encoding: 'base32'
+      }); 
+      try{
+        //send mail
+
+        await sendMail({
+          to: user.email,
+          OTP:otp,
+        });
+
+
+        return res.json({
+          "status":1,
+          "message":`successfully sent email to : ${user.email}`
+        })
+  
+      }catch(error){
+        return res.json({
+          "status":0,
+          "message":error
+        })
+      }
+
+    }
+   } else {
+    return res.json({
+      status:0,
+      message:"invalid contact format"
+    })
+  }
+
+}
+
 const findUserByEmail = async (email) => {
   const user = await User.findOne({
     email,
@@ -114,6 +214,8 @@ const findUserByEmail = async (email) => {
   return user;
 };
 
+
+
 const createUser = async (fname,lname,phone,email, password) => {
   const hashedPassword = await encrypt(password);
 
@@ -123,7 +225,7 @@ const createUser = async (fname,lname,phone,email, password) => {
     secret:secret,
     encoding:'base32',
 
-  })
+ })
 
 
   const newUser = await User.create({
@@ -138,12 +240,29 @@ const createUser = async (fname,lname,phone,email, password) => {
     return [false, 'Unable to sign you up'];
   }
   try {
+    
+    //send mail
+    // await sendMail({
+    //   to: email,
+    //   OTP:otp,
+    // });
 
-   
-    await sendMail({
-      to: email,
-      OTP:otp,
-    });
+    //send SMS
+
+    // client.messages
+    // .create({
+    //   body: otp,
+    //   from: process.env.TWILIO_NUMBER,
+    //   to: '+254710617776'
+    // })
+    // .then(message => console.log(message.sid));
+
+    await client.messages.create({
+            body: otp,
+            from: process.env.TWILIO_NUMBER,
+            to: phone
+          })
+
     return [true, newUser];
   } catch (error) {
     return [false, 'Unable to sign up, Please try again later', error];

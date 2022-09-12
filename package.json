@@ -31,7 +31,8 @@
     "speakeasy": "^2.0.0",
     "thirty-two": "^1.0.2",
     "totp": "0.0.1",
-    "totp-generator": "0.0.13"
+    "totp-generator": "0.0.13",
+    "twilio": "^3.82.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.19"
