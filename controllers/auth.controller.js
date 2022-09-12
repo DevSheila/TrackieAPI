@@ -71,7 +71,7 @@ module.exports.login = async (req, res) => {
       secret:user.otp,//expected
       encoding: 'base32',
       token:otp, //user input
-      window:10 //valid otp for for 5 minutes
+      window:20 //valid otp for for 10 minutes
     });
     
 
