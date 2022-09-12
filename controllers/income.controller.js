@@ -31,8 +31,8 @@ module.exports={
     deleteIncome:async (req,res)=>{
         try{
             // get income and  userId
-            const income= await Income.findOne(req.params.incomeId);
-            const incomeUserId=income.dataValues.userId;
+            const income= await Income.findById(req.params.incomeId);
+            const incomeUserId=income.user;
     
             // validate and destroy
             if(req.decoded.result._id !== incomeUserId){
@@ -41,7 +41,7 @@ module.exports={
                     message:"you are unauthorised to delete this income"
                 });
             }else{
-                let results=await income.destroy();
+                let results=await income.delete();
                 return res.json({
                     success: 1,
                     message:"success",
@@ -49,6 +49,7 @@ module.exports={
                    });
             }
         }catch(error){
+            console.log(error)
             return res.json({
                 success: 0,
                 message:error
@@ -76,6 +77,32 @@ module.exports={
                     data:results
                    });
             }
+        }catch(error){
+            return res.json({
+                success: 0,
+                message:`could not update income ${error}`
+            });
+    
+        }
+    },getAllUserIncome:async (req,res)=>{
+        try{
+            
+        let user=req.decoded.result._id;
+        let incomeList= await Income.find({user:user})
+
+        if(!incomeList){
+            return res.json({
+                success: 1,
+                message:"no incomes added bu=y current user",
+                });
+        }
+
+        return res.json({
+            success: 1,
+            message:"success",
+            data:incomeList
+            });
+            
         }catch(error){
             return res.json({
                 success: 0,
