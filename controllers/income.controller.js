@@ -110,5 +110,33 @@ module.exports={
             });
     
         }
+     },
+     getIncomeById:async (req,res)=>{
+        try{
+        let incomeId = req.params.incomeId;
+        let income= await Income.find({_id:incomeId})
+
+        let user=req.decoded.result._id;
+
+        if(income[0].user !== user){
+            return res.json({
+                success: 1,
+                message:"You are unauthorised to view this income",
+                });
+        }
+
+        return res.json({
+            success: 1,
+            message:"success",
+            data:income
+            });
+            
+        }catch(error){
+            return res.json({
+                success: 0,
+                message:`income could not be accessed${error}`
+            });
+    
+        }
      }
 }

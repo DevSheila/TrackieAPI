@@ -1,7 +1,7 @@
 require('dotenv').config();
 module.exports = {
-  allowedOrigins: ['http://localhost:5000/'],
-  SERVER_PORT: process.env.PORT || 5000,
+  allowedOrigins: ['http://localhost:3000/'],
+  SERVER_PORT: process.env.PORT || 3000,
   SERVER_DB_URI: process.env.DB_URI,
   // JWT_SECRET: `${process.env.JWT_SECRET}`,
   JWT_SECRET: "56ab984hi",
