@@ -32,8 +32,15 @@ module.exports={
         try{
             // get income and  userId
             const income= await Income.findById(req.params.incomeId);
-            const incomeUserId=income.user;
-    
+           
+            if(!income){
+                return res.json({
+                    success: 0,
+                    message:`income not found`
+                });
+            }
+            const incomeUserId=income[0].user;
+
             // validate and destroy
             if(req.decoded.result._id !== incomeUserId){
                 return res.json({
@@ -49,38 +56,10 @@ module.exports={
                    });
             }
         }catch(error){
-            console.log(error)
+     
             return res.json({
                 success: 0,
-                message:error
-            });
-    
-        }
-    },updateIncome:async (req,res)=>{
-        try{
-            // get income and it's userId
-            const income= await Income.findOne(req.params.incomeId);
-            const incomeUserId=income.dataValues.userId;
-    
-            // validate and update
-            if(req.decoded.result._id !== incomeUserId){
-                return res.json({
-                    success: 0,
-                    message:"you are unauthorised to update this income"
-                });
-
-            }else{
-                let results=await income.destroy();
-                return res.json({
-                    success: 1,
-                    message:"success",
-                    data:results
-                   });
-            }
-        }catch(error){
-            return res.json({
-                success: 0,
-                message:`could not update income ${error}`
+                message:`could not delete income. ${error}`
             });
     
         }
@@ -138,5 +117,41 @@ module.exports={
             });
     
         }
-     }
+     },updateIncome:async (req,res)=>{
+        try{
+            // get income and  userId
+            const income= await Income.findById(req.params.incomeId);
+            console.log(income)
+           
+            if(!income){
+                return res.json({
+                    success: 0,
+                    message:`income not found`
+                });
+            }
+            const incomeUserId=income.user;
+
+            // validate and destroy
+            if(req.decoded.result._id !== incomeUserId){
+                return res.json({
+                    success: 0,
+                    message:"you are unauthorised to update this income"
+                });
+            }else{
+                let results=await income.update(req.body);
+                return res.json({
+                    success: 1,
+                    message:"success",
+                    data:results
+                   });
+            }
+        }catch(error){
+     
+            return res.json({
+                success: 0,
+                message:`could not update income. ${error}`
+            });
+    
+        }
+    }
 }
