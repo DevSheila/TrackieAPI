@@ -1,0 +1,56 @@
+Models -Budget,Budget Items,Category,Country Code(For SMS)
+
+
+Category-id,name,type
+        -type(income/expense)
+        Types of income-wages,salary,commission,interest,
+                investment ,gifts,allowance/pocket money,
+                governemnt payments
+        Types of expenses-housing,food,transportation,child care,health care
+                            other necessities,taxes
+
+Country code -code ,Country identifier
+
+Budget - id,date created,userId,budget period(start date and end date)
+Budget items -name,desc,type(income/expense),categoryid,amount
+
+Steps:
+1.Create budget,(Create automatic timestamp,pick current user id)
+2.Create items(on creating each item , pass budget id ) then push
+
+
+.populate to get users and their corresponding data
+Negate expenses in database
+[
+    {
+    item 1
+    },{
+    item 2
+
+    },{
+    item 3
+    },
+    {
+    item 4
+    }
+]
+
+TO DO :TRACKIE
+Table relations
+-Budgets,budget items
+-category to incomes and expenses
+-phone number to country code 
+
+Type conversions (amount and dates)
+??
+
+hosting app on vercel.
+
+
+
+TABLES RELATIONS 
+Incomes ,Expenses,Budget models-User ref(on user property)on delete and update user,cascade
+BudgetItems - to Budgeton delete/ update budget, cascade
+            - to Category on update/delete category, cascade.
+
+Phone number country code -To User , on delete update/cascade ???

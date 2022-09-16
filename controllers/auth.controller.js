@@ -205,6 +205,44 @@ module.exports.getOtp = async (req, res) => {
 
 }
 
+module.exports.deleteUser=async (req,res)=>{
+    try{
+        // get user and  userId
+        const user= await User.findById(req.params.userId);
+       
+        if(!user){
+            return res.json({
+                success: 0,
+                message:`user not found`
+            });
+        }
+        const userId=user[0].user;
+
+        // validate and destroy
+        if(req.decoded.result._id !== userId){
+            return res.json({
+                success: 0,
+                message:"you are unauthorised to delete this user"
+            });
+        }else{
+            let results=await user.delete();
+            return res.json({
+                success: 1,
+                message:"success",
+                data:results
+               });
+        }
+    }catch(error){
+ 
+        return res.json({
+            success: 0,
+            message:`could not delete user. ${error}`
+        });
+
+    }
+}
+
+
 const findUserByEmail = async (email) => {
   const user = await User.findOne({
     email,
