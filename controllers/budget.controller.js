@@ -103,7 +103,17 @@ module.exports={
             let budget =await Budget.findById(req.params.budgetId);
             let items = await BudgetItem.find({budgetId:budget._id}).populate('budgetId');
 
-            console.log(budget)
+            let user = req.decoded.result.id;
+            let userId= budget.user;
+
+            if(user !== userId){
+                return res.json({
+                    success: 0,
+                    message:`You are unauthorised to access this record`
+                });
+    
+
+            }
 
             return res.json({
                 success: 1,
@@ -125,6 +135,18 @@ module.exports={
         try{
             let budget =await Budget.findById(req.params.budgetId);
             let budgetItems = await BudgetItem.find({budgetId:budget._id});
+
+            let user= req.decoded.result._id;//current user
+            let userId= budget.user;//budget user
+
+            if(user != userId){
+                return res.json({
+                    success:0,
+                    message:"You are unauthorised to delete this record/budget"
+                })
+                
+            }
+
 
             budgetItems.forEach(async (item)=>{
                 try{

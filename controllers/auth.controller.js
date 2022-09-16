@@ -279,22 +279,6 @@ const createUser = async (fname,lname,phone,email, password) => {
     return [false, 'Unable to sign you up'];
   }
   try {
-    
-    //send mail
-    // await sendMail({
-    //   to: email,
-    //   OTP:otp,
-    // });
-
-    //send SMS
-
-    // client.messages
-    // .create({
-    //   body: otp,
-    //   from: process.env.TWILIO_NUMBER,
-    //   to: '+254710617776'
-    // })
-    // .then(message => console.log(message.sid));
 
     await client.messages.create({
             body: otp,
