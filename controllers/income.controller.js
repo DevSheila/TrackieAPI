@@ -104,16 +104,16 @@ module.exports={
                 });
         }
 
-        return res.json({
-            success: 1,
-            message:"success",
-            data:income
-            });
+            return res.json({
+                success: 1,
+                message:"success",
+                data:income
+                });
             
         }catch(error){
             return res.json({
                 success: 0,
-                message:`income could not be accessed${error}`
+                message:`income could not be accessed ${error}`
             });
     
         }

@@ -94,8 +94,6 @@ module.exports={
                 });
             }
         }
-       
-    
     }
     ,getBudgetById:async(req,res)=>{
 
@@ -111,8 +109,6 @@ module.exports={
                     success: 0,
                     message:`You are unauthorised to access this record`
                 });
-    
-
             }
 
             return res.json({
@@ -129,7 +125,6 @@ module.exports={
 
         }
     }
-
     ,deleteBudgetById:async(req,res)=>{
 
         try{
@@ -144,9 +139,7 @@ module.exports={
                     success:0,
                     message:"You are unauthorised to delete this record/budget"
                 })
-                
             }
-
 
             budgetItems.forEach(async (item)=>{
                 try{
@@ -198,7 +191,6 @@ module.exports={
                         success: 0,
                         message:`Error occured deleting budget ${error}`
                     });
-        
                 }
             }else{
 
@@ -206,16 +198,65 @@ module.exports={
                     success: 0,
                     message:`You are unauthorised to delete this record.`
                 });
-
             }
-       
-         
 
         }catch(error){
             return res.json({
                 success: 0,
                 message:`Error occured deleting budget item${error}`
             });
+
+        }
+    },
+    getAllUserBudget:async (req,res)=>{
+        try{
+            let user= req.decoded.result._id;//current user
+            let budgets=await Budget.find({user:user});
+
+            if(budgets == null){
+
+                return res.json({
+                    success:0,
+                    message:"You have no budget."
+                })
+            }
+
+            let budgetItems=[];
+            let budgetIds=[];
+
+            budgets.forEach((item)=>{
+                budgetIds.push(item._id)
+                console.log(budgetIds)
+            })
+
+            budgetIds.forEach(async (id)=>{
+               try{
+                let items= await BudgetItem.find({budgetId:id}).populate('BudgetId')
+                budgetItems.push(items)
+                console.log(items)
+
+               }catch(error){
+                    return res.json({
+                        success:0,
+                        message:`An error occured ${error}`
+                    })
+               }
+            })
+
+            console.log(budgetIds)
+
+
+            return res.json({
+                success:1,
+                message:"retrieved budgets",
+                data:budgetItems
+            })
+            
+        }catch(error){
+            return res.json({
+                success:0,
+                message:`Error occured in retrieving budgets ${error}`
+            })
 
         }
     }
