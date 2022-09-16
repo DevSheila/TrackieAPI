@@ -4,8 +4,6 @@ const BudgetItem = require("../models/BudgetItem")
 
 module.exports={
     addBudget: async (req,res)=>{
-
-
         //validations
         if(req.body.startDate == null || req.body.endDate== null || (req.body.income == null  && req.body.expense == null) ){ //  
           
@@ -15,20 +13,15 @@ module.exports={
             });
 
         }else{
-
             try{
-
                const userId=req.decoded.result._id;
 
                const user =await User.findById(userId)
-               req.body.user=user._id;
+               req.body.user=user._id;//get user object id
 
+               //create a budget
                const budget = new Budget(req.body);
                let newBudget= await budget.save();
-            //    let finalBudget =await Budget.findById(newBudget._id)
-
-
-
 
                //add income budget items
                if(req.body.income != null){
@@ -44,10 +37,8 @@ module.exports={
 
                             item.budgetId=newBudget._id;
                             let budgetItem = new BudgetItem(item);
-                            budgetItem =await budgetItem.save() 
+                            await budgetItem.save() 
                             
-                            newBudget.budgetItems.push(budgetItem._id);
-                            // console.log(budgetItem)
                         }catch(error){
                             return res.json({
                                 success: 0,
@@ -74,7 +65,6 @@ module.exports={
                         item.budgetId=newBudget._id;
                         let budgetItem = new BudgetItem(item); 
                         await budgetItem.save();
-                        newBudget.budgetItems.push(budgetItem._id);
 
                     }catch(error){
                         return res.json({
@@ -86,19 +76,15 @@ module.exports={
                 });
                }
 
-               //return saved budget
-            //    finalBudget.save(newBudget)
-                // await finalBudget.updateOne(newBudget)
+               let finalBudget =await Budget.findById(newBudget._id);
+            
+            let result = await BudgetItem.find({budgetId:finalBudget._id}).populate('budgetId');
 
-         
-                await newBudget.save()
-                console.log(newBudget)
-
-                return res.json({
-                    success: 1,
-                    message:"successfully created budget",
-                    data:newBudget
-                   });
+            return res.json({
+                success: 1,
+                message:"successfully created budget",
+                data:result
+            });
            
             }catch(error){
                 console.log(error)
@@ -116,7 +102,9 @@ module.exports={
         try{
             let budget =await Budget.findById(req.params.budgetId);
             let items = await BudgetItem.find({budgetId:budget._id}).populate('budgetId');
-            
+
+            console.log(budget)
+
             return res.json({
                 success: 1,
                 message:`Successully retrieved budget `,
@@ -127,6 +115,84 @@ module.exports={
             return res.json({
                 success: 0,
                 message:`Error occured creating budget ${error}`
+            });
+
+        }
+    }
+
+    ,deleteBudgetById:async(req,res)=>{
+
+        try{
+            let budget =await Budget.findById(req.params.budgetId);
+            let budgetItems = await BudgetItem.find({budgetId:budget._id});
+
+            budgetItems.forEach(async (item)=>{
+                try{
+                    await item.delete()
+
+                }catch(error){
+                    return res.json({
+                        success: 0,
+                        message:`Error occured deleting budget ${error}`
+                    });
+                }
+            })
+
+            await budget.delete()
+
+            return res.json({
+                success: 1,
+                message:`Successully deleted budget`,
+            });
+
+        }catch(error){
+            return res.json({
+                success: 0,
+                message:`Error occured deleting budget ${error}`
+            });
+
+        }
+    },
+    deleteBudgetItemById:async(req,res)=>{
+
+        try{
+            let budgetItem = await BudgetItem.findById(req.params.budgetItemId).populate('budgetId')
+
+            let user= req.decoded.result._id;//current user
+            let budgetUserId = budgetItem.budgetId.user;//budget user
+
+            if( budgetUserId == user){
+                try{
+
+                    await budgetItem.delete()
+                    return res.json({
+                        success: 1,
+                        message:`Successully deleted budget`,
+                    });
+
+                }catch(error){
+
+                    return res.json({
+                        success: 0,
+                        message:`Error occured deleting budget ${error}`
+                    });
+        
+                }
+            }else{
+
+                return res.json({
+                    success: 0,
+                    message:`You are unauthorised to delete this record.`
+                });
+
+            }
+       
+         
+
+        }catch(error){
+            return res.json({
+                success: 0,
+                message:`Error occured deleting budget item${error}`
             });
 
         }

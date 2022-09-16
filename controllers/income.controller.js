@@ -72,7 +72,7 @@ module.exports={
         if(!incomeList){
             return res.json({
                 success: 1,
-                message:"no incomes added bu=y current user",
+                message:"no incomes added by current user",
                 });
         }
 
