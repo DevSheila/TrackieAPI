@@ -8,7 +8,7 @@ const connectDB = async () => {
     })
 
     //start server
-    app.listen(PORT, async () => {
+    app.listen(5000, async () => {
     });
   } catch (error) {
     console.log(error);
