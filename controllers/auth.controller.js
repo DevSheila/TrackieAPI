@@ -83,14 +83,14 @@ module.exports.login = async (req, res) => {
   }else{
     return res.json({
       success: 0,
-      data: "Provide email or phone number"
+      message: "Provide email or phone number"
     });
   }
 
   if (!user) {
     return res.json({
       success: 0,
-      data: "Invalid email"
+      message: "Invalid email"
     });
 
   }else{
@@ -120,7 +120,7 @@ module.exports.login = async (req, res) => {
     } else {
       return res.json({
         success: 0,
-        data: "Invalid OTP",
+        message: "Invalid OTP",
         otp:otp,
         validOtp:validOtp
       });
