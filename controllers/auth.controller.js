@@ -23,16 +23,48 @@ module.exports.signUpUser = async (req, res) => {
       return res.send('Already existing');
     }
     // create new user
-    const newUser = await createUser(fname,lname,phone,email, password);
-    if (!newUser[0]) {
-      return res.status(400).send({
-        message: 'Unable to create new user',
-      });
+  
+    const hashedPassword = await encrypt(password);
+    let secret =speakeasy.generateSecret({length:20}).base32;
+    let otp = speakeasy.totp({
+      secret:secret,
+      encoding:'base32',
+
+    })
+    const newUser = await User.create({
+      fname,
+      lname,
+      phone,
+      email,
+      password: hashedPassword,
+      otp: secret
+    });
+    if (!newUser) {
+      return res.json({
+        status:0,
+        message:`User not created `
+      })
     }
-    res.send(newUser);
+      
+
+    // await client.messages.create({
+    //         body: otp,
+    //         from: process.env.TWILIO_NUMBER,
+    //         to: phone
+    //       })
+
+    return res.json({
+      status:1,
+      message:`Successful sign up.Next step is login`,
+      data:newUser
+    })
 
   }catch(error){
-    console.log(error)
+
+    return res.json({
+      status:0,
+      message:`Unable to sign up user .${error}`
+    })
   }
 };
 
@@ -256,29 +288,28 @@ const findUserByEmail = async (email) => {
 
 
 const createUser = async (fname,lname,phone,email, password) => {
-  const hashedPassword = await encrypt(password);
 
-  let secret =speakeasy.generateSecret({length:20}).base32;
+  try{
 
-  let otp = speakeasy.totp({
-    secret:secret,
-    encoding:'base32',
+    const hashedPassword = await encrypt(password);
+    let secret =speakeasy.generateSecret({length:20}).base32;
+    let otp = speakeasy.totp({
+      secret:secret,
+      encoding:'base32',
 
- })
-
-
-  const newUser = await User.create({
-    fname,
-    lname,
-    phone,
-    email,
-    password: hashedPassword,
-    otp: secret
-  });
-  if (!newUser) {
-    return [false, 'Unable to sign you up'];
-  }
-  try {
+    })
+    const newUser = await User.create({
+      fname,
+      lname,
+      phone,
+      email,
+      password: hashedPassword,
+      otp: secret
+    });
+    if (!newUser) {
+      return [false, 'Unable to sign you up'];
+    }
+      
 
     await client.messages.create({
             body: otp,
@@ -287,9 +318,11 @@ const createUser = async (fname,lname,phone,email, password) => {
           })
 
     return [true, newUser];
-  } catch (error) {
+ 
+  }catch(error){
     return [false, 'Unable to sign up, Please try again later', error];
   }
+  
 };
 
 
