@@ -54,3 +54,12 @@ BudgetItems - to Budgeton delete/ update budget, cascade
             - to Category on update/delete category, cascade.
 
 Phone number country code -To User , on delete update/cascade ???
+
+
+Creating end to end layouts for arios views
+Authentication endpoints intergrations
+
+
+Today
+complete intergrations of all endpoints
+push notification

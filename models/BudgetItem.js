@@ -14,10 +14,6 @@ const budgetItemSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  desc: {
-    type: String,
-    required: false,
-  },
   amount:{
     type: String,
     required: true,

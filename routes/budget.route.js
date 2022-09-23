@@ -5,6 +5,9 @@ const {checkToken}= require("../services/token_validations")//route protection w
 router.get('/view/:budgetId', checkToken ,budgetController.getBudgetById);
 router.get('/viewall', checkToken ,budgetController.getAllUserBudget);
 router.post('/add', checkToken ,budgetController.addBudget);
+router.post('/budgetItem/add', checkToken ,budgetController.AddBudgetItem);
+
+
 router.delete('/delete/:budgetId', checkToken ,budgetController.deleteBudgetById);
 router.get('/budgetItem/delete/:budgetItemId', checkToken ,budgetController.deleteBudgetItemById);
 

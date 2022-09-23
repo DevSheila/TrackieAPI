@@ -3,12 +3,42 @@ const User = require('../models/User');
 const BudgetItem = require("../models/BudgetItem")
 
 module.exports={
+
+    AddBudgetItem: async (req,res)=>{
+    
+        if(req.body.budgetId== null ||req.body.type== null || req.body.category== null ||req.body.name== null ||req.body.amount== null ){
+            return res.json({
+                status: 0,
+                message:"Please enter all required fields"
+            });
+
+        }else{
+            const mongoose = require('mongoose');
+            req.body.budgetId = mongoose.Types.ObjectId(req.body.budgetId);
+            const budgetItem = new BudgetItem(req.body);
+            try{
+               let results= await budgetItem.save()
+               return res.json({
+                status: 1,
+                message:"success",
+                data:results
+               });
+            }catch(error){
+                return res.json({
+                    status: 0,
+                    message:error
+                });
+            }
+        }
+       
+    
+    },
     addBudget: async (req,res)=>{
         //validations
         if(req.body.startDate == null || req.body.endDate== null || (req.body.income == null  && req.body.expense == null) ){ //  
           
             return res.json({
-                success: 0,
+                status: 0,
                 message:"Please enter all required fields"
             });
 
@@ -30,7 +60,7 @@ module.exports={
 
                             if(item.type == null || item.category == null || item.name == null  || item.amount == null){ 
                                 return res.json({
-                                    success: 0,
+                                    status: 0,
                                     message:"Please enter all required fields for a budget item"
                                 });
                             }
@@ -41,7 +71,7 @@ module.exports={
                             
                         }catch(error){
                             return res.json({
-                                success: 0,
+                                status: 0,
                                 message: `Could not create budget item ${error}`
                                });
                         }
@@ -57,7 +87,7 @@ module.exports={
 
                         if(item.type == null || item.category == null || item.name == null  || item.amount == null){ 
                             return res.json({
-                                success: 0,
+                                status: 0,
                                 message:"Please enter all required fields for a budget item"
                             });
                         }
@@ -68,7 +98,7 @@ module.exports={
 
                     }catch(error){
                         return res.json({
-                            success: 0,
+                            status: 0,
                             message: `Could not create budget item ${error}`
                            });
                     }
@@ -81,7 +111,7 @@ module.exports={
             let result = await BudgetItem.find({budgetId:finalBudget._id}).populate('budgetId');
 
             return res.json({
-                success: 1,
+                status: 1,
                 message:"successfully created budget",
                 data:result
             });
@@ -89,7 +119,7 @@ module.exports={
             }catch(error){
                 console.log(error)
                 return res.json({
-                    success: 0,
+                    status: 0,
                     message:`Error occured creating budget ${error}`
                 });
             }
@@ -101,25 +131,28 @@ module.exports={
             let budget =await Budget.findById(req.params.budgetId);
             let items = await BudgetItem.find({budgetId:budget._id}).populate('budgetId');
 
-            let user = req.decoded.result.id;
+            let user = req.decoded.result._id;
             let userId= budget.user;
+            console.log(user)
+            console.log(userId)
 
-            if(user !== userId){
+
+            if(user != userId){
                 return res.json({
-                    success: 0,
+                    status: 0,
                     message:`You are unauthorised to access this record`
                 });
             }
 
             return res.json({
-                success: 1,
+                status: 1,
                 message:`Successully retrieved budget `,
                 data:items
             });
 
         }catch(error){
             return res.json({
-                success: 0,
+                status: 0,
                 message:`Error occured creating budget ${error}`
             });
 
@@ -136,7 +169,7 @@ module.exports={
 
             if(user != userId){
                 return res.json({
-                    success:0,
+                    status:0,
                     message:"You are unauthorised to delete this record/budget"
                 })
             }
@@ -147,7 +180,7 @@ module.exports={
 
                 }catch(error){
                     return res.json({
-                        success: 0,
+                        status: 0,
                         message:`Error occured deleting budget ${error}`
                     });
                 }
@@ -156,13 +189,13 @@ module.exports={
             await budget.delete()
 
             return res.json({
-                success: 1,
+                status: 1,
                 message:`Successully deleted budget`,
             });
 
         }catch(error){
             return res.json({
-                success: 0,
+                status: 0,
                 message:`Error occured deleting budget ${error}`
             });
 
@@ -181,28 +214,28 @@ module.exports={
 
                     await budgetItem.delete()
                     return res.json({
-                        success: 1,
+                        status: 1,
                         message:`Successully deleted budget`,
                     });
 
                 }catch(error){
 
                     return res.json({
-                        success: 0,
+                        status: 0,
                         message:`Error occured deleting budget ${error}`
                     });
                 }
             }else{
 
                 return res.json({
-                    success: 0,
+                    status: 0,
                     message:`You are unauthorised to delete this record.`
                 });
             }
 
         }catch(error){
             return res.json({
-                success: 0,
+                status: 0,
                 message:`Error occured deleting budget item${error}`
             });
 
@@ -216,7 +249,7 @@ module.exports={
             if(budgets == null){
 
                 return res.json({
-                    success:0,
+                    status:0,
                     message:"You have no budget."
                 })
             }
@@ -226,35 +259,38 @@ module.exports={
 
             budgets.forEach((item)=>{
                 budgetIds.push(item._id)
-                console.log(budgetIds)
+                
             })
+
+            let budgetIdsCount=budgets.length;
+            let counter =0;
 
             budgetIds.forEach(async (id)=>{
                try{
-                let items= await BudgetItem.find({budgetId:id}).populate('BudgetId')
+                let items= await BudgetItem.find({budgetId:id}).populate('budgetId');
                 budgetItems.push(items)
-                console.log(items)
+                counter++;
 
+                if(budgetIdsCount == counter){
+                    return res.json({
+                        status:1,
+                        message:"retrieved budgets",
+                        data:budgetItems
+                    })
+                }
                }catch(error){
                     return res.json({
-                        success:0,
+                        status:0,
                         message:`An error occured ${error}`
                     })
                }
             })
 
-            console.log(budgetIds)
-
-
-            return res.json({
-                success:1,
-                message:"retrieved budgets",
-                data:budgetItems
-            })
+          
             
         }catch(error){
             return res.json({
-                success:0,
+                status:0,
                 message:`Error occured in retrieving budgets ${error}`
             })
 

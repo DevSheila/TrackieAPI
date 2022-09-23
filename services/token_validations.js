@@ -43,7 +43,7 @@ module.exports = {
       });
     }else {
       return res.json({
-        success: 0,
+        status: 0,
         message: "Access Denied! Unauthorized User"
       });
     }

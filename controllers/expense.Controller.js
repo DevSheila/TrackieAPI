@@ -5,7 +5,7 @@ module.exports={
     
         if(req.body.desc== null || req.body.category== null ||req.body.amount== null ||req.body.date== null ){
             return res.json({
-                success: 0,
+                status: 0,
                 message:"Please enter all required fields"
             });
 
@@ -14,13 +14,13 @@ module.exports={
             try{
                let results= await expense.save()
                return res.json({
-                success: 1,
+                status: 1,
                 message:"success",
                 data:results
                });
             }catch(error){
                 return res.json({
-                    success: 0,
+                    status: 0,
                     message:error
                 });
             }
@@ -35,7 +35,7 @@ module.exports={
            
             if(!expense){
                 return res.json({
-                    success: 0,
+                    status: 0,
                     message:`expense not found`
                 });
             }
@@ -44,13 +44,13 @@ module.exports={
             // validate and destroy
             if(req.decoded.result._id !== expenseUserId){
                 return res.json({
-                    success: 0,
+                    status: 0,
                     message:"you are unauthorised to delete this expense"
                 });
             }else{
                 let results=await expense.delete();
                 return res.json({
-                    success: 1,
+                    status: 1,
                     message:"success",
                     data:results
                    });
@@ -58,7 +58,7 @@ module.exports={
         }catch(error){
      
             return res.json({
-                success: 0,
+                status: 0,
                 message:`could not delete expense. ${error}`
             });
     
@@ -71,20 +71,20 @@ module.exports={
 
         if(!expenseList){
             return res.json({
-                success: 1,
+                status: 1,
                 message:"no expenses added bu=y current user",
                 });
         }
 
         return res.json({
-            success: 1,
+            status: 1,
             message:"success",
             data:expenseList
             });
             
         }catch(error){
             return res.json({
-                success: 0,
+                status: 0,
                 message:error
             });
     
@@ -99,20 +99,20 @@ module.exports={
 
         if(expense[0].user !== user){
             return res.json({
-                success: 1,
+                status: 1,
                 message:"You are unauthorised to view this expense",
                 });
         }
 
         return res.json({
-            success: 1,
+            status: 1,
             message:"success",
             data:expense
             });
             
         }catch(error){
             return res.json({
-                success: 0,
+                status: 0,
                 message:`expense could not be accessed${error}`
             });
     
@@ -125,7 +125,7 @@ module.exports={
            
             if(!expense){
                 return res.json({
-                    success: 0,
+                    status: 0,
                     message:`expense not found`
                 });
             }
@@ -134,13 +134,13 @@ module.exports={
             // validate and destroy
             if(req.decoded.result._id !== expenseUserId){
                 return res.json({
-                    success: 0,
+                    status: 0,
                     message:"you are unauthorised to update this expense"
                 });
             }else{
                 let results=await expense.update(req.body);
                 return res.json({
-                    success: 1,
+                    status: 1,
                     message:"success",
                     data:results
                    });
@@ -148,7 +148,7 @@ module.exports={
         }catch(error){
      
             return res.json({
-                success: 0,
+                status: 0,
                 message:`could not update expense. ${error}`
             });
     

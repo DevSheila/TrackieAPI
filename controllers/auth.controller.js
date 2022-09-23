@@ -20,7 +20,10 @@ module.exports.signUpUser = async (req, res) => {
     const { fname,lname,phone,email, password } = req.body;
     const isExisting = await findUserByEmail(email);
     if (isExisting) {
-      return res.send('Already existing');
+      return res.json({
+        status:0,
+        message:'User Already exists'
+      });
     }
     // create new user
   
@@ -47,11 +50,11 @@ module.exports.signUpUser = async (req, res) => {
     }
       
 
-    // await client.messages.create({
-    //         body: otp,
-    //         from: process.env.TWILIO_NUMBER,
-    //         to: phone
-    //       })
+    await client.messages.create({
+            body: otp,
+            from: process.env.TWILIO_NUMBER,
+            to: phone
+          })
 
     return res.json({
       status:1,
@@ -75,22 +78,22 @@ module.exports.login = async (req, res) => {
   //find means of login
   let user ="";
 
-  if(email){
+  if(email != null){
     user= await User.findOne({email});
-  }else if(phone){
+  }else if(phone !=null){
     user= await User.findOne({phone});
 
   }else{
     return res.json({
-      success: 0,
+      status: 0,
       message: "Provide email or phone number"
     });
   }
 
   if (!user) {
     return res.json({
-      success: 0,
-      message: "Invalid email"
+      status: 0,
+      message: "Invalid contact details"
     });
 
   }else{
@@ -112,17 +115,30 @@ module.exports.login = async (req, res) => {
     if(tokenValidate){
       let token = sign({ result: user }, JWT_SECRET, {expiresIn: "1h"});
 
+      if(email != null){
+        await client.messages.create({
+          body: otp,
+          from: process.env.TWILIO_NUMBER,
+          to: phone
+        })
+      }
+      if(phone !=null){
+        user= await User.findOne({phone});
+    
+      }
+
       return res.json({
-        success: 1,
+        status: 1,
         message: "login successfully",
         token: token,
       });
     } else {
       return res.json({
-        success: 0,
+        status: 0,
         message: "Invalid OTP",
-        otp:otp,
-        validOtp:validOtp
+        data:{
+          validOtp:validOtp
+        }
       });
     }
   }
@@ -140,13 +156,13 @@ module.exports.logout = async (req, res) => {
     });
     //do some redirect?or expire session
     return res.json({
-              success: 1,
+              status: 1,
               message: "logout successfully",
               user: updatedUser
             });
   }catch(error){
     res.json({
-      success: 1,
+      status: 1,
       error:error
      
     }); 
@@ -244,7 +260,7 @@ module.exports.deleteUser=async (req,res)=>{
        
         if(!user){
             return res.json({
-                success: 0,
+                status: 0,
                 message:`user not found`
             });
         }
@@ -253,13 +269,13 @@ module.exports.deleteUser=async (req,res)=>{
         // validate and destroy
         if(req.decoded.result._id !== userId){
             return res.json({
-                success: 0,
+                status: 0,
                 message:"you are unauthorised to delete this user"
             });
         }else{
             let results=await user.delete();
             return res.json({
-                success: 1,
+                status: 1,
                 message:"success",
                 data:results
                });
@@ -267,7 +283,7 @@ module.exports.deleteUser=async (req,res)=>{
     }catch(error){
  
         return res.json({
-            success: 0,
+            status: 0,
             message:`could not delete user. ${error}`
         });
 
